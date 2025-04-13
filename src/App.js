@@ -8,7 +8,7 @@ function App() {
   useEffect(() => {
     const fetchMessage = async () => {
       try {
-        const response = await fetch('https://audreyai-app42ab4ec2.azurewebsites.net/', {
+        const response = await fetch(process.env.REACT_APP_API_URL, {
           headers: {
             'accept': 'application/json'
           }
