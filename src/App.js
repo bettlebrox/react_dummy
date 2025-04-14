@@ -8,10 +8,10 @@ function App() {
   useEffect(() => {
     const fetchMessage = async () => {
       try {
-        const response = await fetch(process.env.REACT_APP_API_URL, {
+        const response = await fetch(process.env.REACT_APP_API_URL + "/messages", {
           headers: {
-            'accept': 'application/json'
-          }
+            accept: "application/json",
+          },
         });
         
         if (!response.ok) {
