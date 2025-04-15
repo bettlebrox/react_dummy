@@ -7,6 +7,7 @@ const msalConfig = {
     clientId: process.env.REACT_APP_AUTH_CLIENT_ID,
     authority: `https://login.microsoftonline.com/${process.env.REACT_APP_AUTH_TENANT_ID}`,
     redirectUri: window.location.origin + '/',
+    clientType: "Single-Page Application"
   },
   cache: {
     cacheLocation: "sessionStorage",
