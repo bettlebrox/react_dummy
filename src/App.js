@@ -24,12 +24,18 @@ function App() {
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    // Check if user is already signed in
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
-      setIsAuthenticated(true);
-      setUserName(accounts[0].name || accounts[0].username);
-    }
+    // Initialize MSAL
+    msalInstance.initialize().then(() => {
+      // Check if user is already signed in
+      const accounts = msalInstance.getAllAccounts();
+      if (accounts.length > 0) {
+        setIsAuthenticated(true);
+        setUserName(accounts[0].name || accounts[0].username);
+      }
+    }).catch(error => {
+      console.error("MSAL initialization failed:", error);
+      setError("Authentication initialization failed. Please refresh the page.");
+    });
   }, []);
 
   const handleLogin = async () => {
