@@ -10,13 +10,12 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(process.env.REACT_APP_API_URL + "/chat", {
+      const response = await fetch(process.env.REACT_APP_API_URL + "/chat?message=" + inputMessage, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'accept': 'application/json',
         },
-        body: JSON.stringify({ message: inputMessage }),
       });
       
       if (!response.ok) {
