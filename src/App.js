@@ -33,7 +33,7 @@ function App() {
 
   return (
     <div>
-      <h1>Chat with Audrey</h1>
+      <h1>Chat with AAI</h1>
       <div>
         <input
           type="text"
