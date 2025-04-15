@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { PublicClientApplication, InteractionRequiredAuthError } from '@azure/msal-browser';
+import { MsalProvider, useMsal, useIsAuthenticated } from '@azure/msal-react';
+import { PublicClientApplication, EventType } from '@azure/msal-browser';
 
 const msalConfig = {
   auth: {
     clientId: process.env.REACT_APP_AUTH_CLIENT_ID,
     authority: `https://login.microsoftonline.com/${process.env.REACT_APP_AUTH_TENANT_ID}`,
-    redirectUri: process.env.REACT_APP_AUTH_REDIRECT_URI,
+    redirectUri: window.location.origin + '/',
   },
   cache: {
     cacheLocation: "sessionStorage",
@@ -15,36 +16,40 @@ const msalConfig = {
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
-function App() {
+// Account selection logic is app dependent. Adjust as needed for different use cases.
+const accounts = msalInstance.getAllAccounts();
+if (accounts.length > 0) {
+  msalInstance.setActiveAccount(accounts[0]);
+}
+
+msalInstance.addEventCallback((event) => {
+  if (event.eventType === EventType.LOGIN_SUCCESS && event.payload.account) {
+    const account = event.payload.account;
+    msalInstance.setActiveAccount(account);
+  }
+});
+
+function AppContent() {
+  const { instance } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [inputMessage, setInputMessage] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    // Initialize MSAL
-    msalInstance.initialize().then(() => {
-      // Check if user is already signed in
-      const accounts = msalInstance.getAllAccounts();
-      if (accounts.length > 0) {
-        setIsAuthenticated(true);
-        setUserName(accounts[0].name || accounts[0].username);
-      }
-    }).catch(error => {
-      console.error("MSAL initialization failed:", error);
-      setError("Authentication initialization failed. Please refresh the page.");
-    });
-  }, []);
+    const account = instance.getActiveAccount();
+    if (account) {
+      setUserName(account.name || account.username);
+    }
+  }, [instance]);
 
   const handleLogin = async () => {
     try {
-      const loginResponse = await msalInstance.loginPopup({
+      await instance.loginPopup({
         scopes: [process.env.REACT_APP_AUTH_SCOPES],
       });
-      setIsAuthenticated(true);
-      setUserName(loginResponse.account.name || loginResponse.account.username);
     } catch (error) {
       console.error("Login failed:", error);
       setError("Login failed. Please try again.");
@@ -52,34 +57,27 @@ function App() {
   };
 
   const handleLogout = () => {
-    msalInstance.logoutPopup();
-    setIsAuthenticated(false);
-    setUserName('');
+    instance.logoutPopup();
   };
 
   const getAccessToken = async () => {
     try {
-      const accounts = msalInstance.getAllAccounts();
-      if (accounts.length === 0) {
-        throw new Error("No accounts found");
+      const account = instance.getActiveAccount();
+      if (!account) {
+        throw new Error("No active account");
       }
 
-      const silentRequest = {
+      const response = await instance.acquireTokenSilent({
         scopes: [process.env.REACT_APP_AUTH_SCOPES],
-        account: accounts[0]
-      };
-
-      const response = await msalInstance.acquireTokenSilent(silentRequest);
+        account: account
+      });
       return response.accessToken;
     } catch (error) {
-      if (error instanceof InteractionRequiredAuthError) {
-        // Fallback to interaction when silent call fails
-        const response = await msalInstance.acquireTokenPopup({
-          scopes: [process.env.REACT_APP_AUTH_SCOPES]
-        });
-        return response.accessToken;
-      }
-      throw error;
+      // Fallback to interaction when silent call fails
+      const response = await instance.acquireTokenPopup({
+        scopes: [process.env.REACT_APP_AUTH_SCOPES]
+      });
+      return response.accessToken;
     }
   };
 
@@ -152,4 +150,12 @@ function App() {
   );
 }
 
-export default App;
+function App() {
+  return (
+    <MsalProvider instance={msalInstance}>
+      <AppContent />
+    </MsalProvider>
+  );
+}
+
+export default App; 
