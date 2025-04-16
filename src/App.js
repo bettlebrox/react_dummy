@@ -49,7 +49,10 @@ function AppContent() {
   const handleLogin = async () => {
     try {
       await instance.loginPopup({
-        scopes: [process.env.REACT_APP_AUTH_SCOPES],
+        scopes: [
+          process.env.REACT_APP_AUTH_SCOPES,
+          "api://audreyai-react-app/access_as_user"
+        ],
       });
     } catch (error) {
       console.error("Login failed:", error);
@@ -69,14 +72,20 @@ function AppContent() {
       }
 
       const response = await instance.acquireTokenSilent({
-        scopes: [process.env.REACT_APP_AUTH_SCOPES],
+        scopes: [
+          process.env.REACT_APP_AUTH_SCOPES,
+          "api://audreyai-react-app/access_as_user"
+        ],
         account: account
       });
       return response.accessToken;
     } catch (error) {
       // Fallback to interaction when silent call fails
       const response = await instance.acquireTokenPopup({
-        scopes: [process.env.REACT_APP_AUTH_SCOPES]
+        scopes: [
+          process.env.REACT_APP_AUTH_SCOPES,
+          "api://audreyai-react-app/access_as_user"
+        ]
       });
       return response.accessToken;
     }
