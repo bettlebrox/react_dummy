@@ -50,8 +50,7 @@ function AppContent() {
     try {
       await instance.loginPopup({
         scopes: [
-          process.env.REACT_APP_AUTH_SCOPES,
-          `api://${process.env.REACT_APP_API_IDENTIFIER}/access_as_user`
+          'access_as_user'
         ],
       });
     } catch (error) {
@@ -73,8 +72,7 @@ function AppContent() {
 
       const response = await instance.acquireTokenSilent({
         scopes: [
-          process.env.REACT_APP_AUTH_SCOPES,
-          `api://${process.env.REACT_APP_API_IDENTIFIER}/access_as_user`
+          'access_as_user'
         ],
         account: account
       });
@@ -83,8 +81,7 @@ function AppContent() {
       // Fallback to interaction when silent call fails
       const response = await instance.acquireTokenPopup({
         scopes: [
-          process.env.REACT_APP_AUTH_SCOPES,
-          `api://${process.env.REACT_APP_API_IDENTIFIER}/access_as_user`
+          'access_as_user'
         ]
       });
       return response.accessToken;
