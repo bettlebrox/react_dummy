@@ -75,9 +75,8 @@ function AppContent() {
 
       const response = await instance.acquireTokenSilent({
         scopes: [
-          'access_as_user'
+          'api://audreyai-api-app/access_as_user'
         ],
-        resourceRequestUri: 'api://audreyai-api-app',
         account: account
       });
       return response.accessToken;
