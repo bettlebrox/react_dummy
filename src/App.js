@@ -4,7 +4,7 @@ import { PublicClientApplication, EventType } from '@azure/msal-browser';
 
 const msalConfig = {
   auth: {
-    clientId: process.env.REACT_APP_AUTH_CLIENT_ID,
+    clientId: 'process.env.REACT_APP_AUTH_CLIENT_ID',
     authority: `https://login.microsoftonline.com/${process.env.REACT_APP_AUTH_TENANT_ID}`,
     redirectUri: window.location.origin + '/',
     clientType: "Single-Page Application"
@@ -50,8 +50,11 @@ function AppContent() {
     try {
       await instance.loginPopup({
         scopes: [
-          'access_as_user'
+          process.env.REACT_APP_AUTH_SCOPES
         ],
+        additionalScopesToConsent: [
+          'api://audreyai-api-app/access_as_user'
+        ]
       });
     } catch (error) {
       console.error("Login failed:", error);
